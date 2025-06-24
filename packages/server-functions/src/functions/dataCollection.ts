@@ -3,6 +3,9 @@ import { Request, Response } from 'express';
 import { validateBatch } from '../utils/validator';
 import { logInfo, logError } from '../utils/logger';
 import { storeRaw } from '../services/eventStore';
+import { RateLimiter } from '../utils/rateLimiter';
+
+const rateLimiter = new RateLimiter({ windowMs: 60000, maxRequests: 10 }); // 10 requests per minute
 
 export const dataCollectionHandler = https.onRequest(async (req: Request, res: Response) => {
   // CORS headers
@@ -12,6 +15,12 @@ export const dataCollectionHandler = https.onRequest(async (req: Request, res: R
 
   if (req.method === 'OPTIONS') {
     return res.status(204).send('');
+  }
+
+  const clientIP = req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress || 'unknown';
+  if (!rateLimiter.isAllowed(clientIP.toString())) {
+    logError('Rate limit exceeded', { ip: clientIP });
+    return res.status(429).json({ error: 'Rate limit exceeded' });
   }
 
   try {
