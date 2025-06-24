@@ -1,5 +1,8 @@
 import { https } from 'firebase-functions';
 import { Request, Response } from 'express';
+import { validateBatch } from '../utils/validator';
+import { logInfo, logError } from '../utils/logger';
+import { storeRaw } from '../services/eventStore';
 
 export const dataCollectionHandler = https.onRequest(async (req: Request, res: Response) => {
   // CORS headers
@@ -12,9 +15,16 @@ export const dataCollectionHandler = https.onRequest(async (req: Request, res: R
   }
 
   try {
-    // TODO: Validate and process events
-    res.status(200).json({ success: true });
+    const events = validateBatch(req.body.events);
+    if (!events.length) {
+      logError('No valid events found', { body: req.body });
+      return res.status(400).json({ error: 'No valid events found' });
+    }
+    await storeRaw(events);
+    logInfo(`Processed ${events.length} events`);
+    res.status(200).json({ success: true, processed: events.length });
   } catch (error) {
+    logError('Data collection error', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }); 
