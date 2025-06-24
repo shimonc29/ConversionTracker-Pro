@@ -1,0 +1,1 @@
+// Data collection function implementation will be added here. 
