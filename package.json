@@ -16,8 +16,11 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@types/express": "^5.0.3",
     "@types/react": "^19.1.8",
     "events": "^3.3.0",
+    "express": "^5.1.0",
+    "firebase-functions": "^6.3.2",
     "react": "^19.1.0"
   }
 }
