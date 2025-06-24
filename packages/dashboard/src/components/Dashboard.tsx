@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MetricsCards } from './MetricsCards';
+import { ConversionsChart } from './ConversionsChart';
 
 const mockMetrics = {
   totalConversions: 123,
@@ -33,7 +34,9 @@ export const Dashboard: React.FC = () => {
       </header>
       <div className="dashboard-grid">
         <MetricsCards metrics={metrics} loading={loading} />
-        <div className="chart-section">Charts will be shown here.</div>
+        <div className="chart-section">
+          <ConversionsChart />
+        </div>
         <div className="attribution-section">Attribution comparison will be shown here.</div>
         <div className="detailed-table">Conversions table will be shown here.</div>
       </div>
