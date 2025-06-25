@@ -14,5 +14,8 @@ export function validateEvent(event: unknown) {
 
 export function validateBatch(events: unknown[]): any[] {
   if (!Array.isArray(events)) return [];
-  return events.map(validateEvent).filter(r => r.success).map(r => r.data);
-} 
+  return events
+    .map(validateEvent)
+    .filter((r) => r.success)
+    .map((r) => r.data);
+}

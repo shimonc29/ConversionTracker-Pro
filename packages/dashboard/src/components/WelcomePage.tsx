@@ -1,15 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { MetricsCards } from './MetricsCards';
-import { ConversionsChart } from './ConversionsChart';
-import { ConversionsTable } from './ConversionsTable';
-import { FilterPanel } from './FilterPanel';
+import React, { useState } from 'react';
 
-const API_BASE_URL = 'https://us-central1-conversiontrackerpro.cloudfunctions.net/api';
-const COLLECT_URL = `${API_BASE_URL}/collect`;
-const GET_CONVERSIONS_URL = `${API_BASE_URL}/conversions`;
+interface WelcomePageProps {
+  onSiteCreated: (siteId: string) => void;
+}
 
-// Welcome Page Component
-const WelcomePage: React.FC<{ onSiteCreated: (siteId: string) => void }> = ({ onSiteCreated }) => {
+export const WelcomePage: React.FC<WelcomePageProps> = ({ onSiteCreated }) => {
   const [siteName, setSiteName] = useState('');
   const [siteUrl, setSiteUrl] = useState('');
   const [step, setStep] = useState<'welcome' | 'create' | 'code'>('welcome');
@@ -211,11 +206,11 @@ const WelcomePage: React.FC<{ onSiteCreated: (siteId: string) => void }> = ({ on
             <h3>Usage Examples:</h3>
             <div className="example">
               <h4>Track a conversion:</h4>
-              <pre><code>{`ConversionTracker.trackConversion({ value: 100, currency: 'USD' });`}</code></pre>
+              <pre><code>ConversionTracker.trackConversion({ value: 100, currency: 'USD' });</code></pre>
             </div>
             <div className="example">
               <h4>Track a custom event:</h4>
-              <pre><code>{`ConversionTracker.track('button_click', { buttonId: 'signup' });`}</code></pre>
+              <pre><code>ConversionTracker.track('button_click', { buttonId: 'signup' });</code></pre>
             </div>
             <div className="example">
               <h4>Track form submissions:</h4>
@@ -232,69 +227,4 @@ const WelcomePage: React.FC<{ onSiteCreated: (siteId: string) => void }> = ({ on
   }
 
   return null;
-};
-
-// Main Dashboard Component
-export const Dashboard: React.FC = () => {
-  const [currentSiteId, setCurrentSiteId] = useState<string | null>(null);
-  const [conversions, setConversions] = useState<any[]>([]);
-  const [loadingConversions, setLoadingConversions] = useState(true);
-  const [filters, setFilters] = useState({
-    dateRange: { start: '', end: '' },
-    type: '',
-  });
-
-  useEffect(() => {
-    if (currentSiteId) {
-      setLoadingConversions(true);
-      fetch(GET_CONVERSIONS_URL)
-        .then(res => res.json())
-        .then(json => setConversions(json.conversions || []))
-        .catch(() => setConversions([]))
-        .finally(() => setLoadingConversions(false));
-    }
-  }, [currentSiteId]);
-
-  // Filter conversions by date and type
-  const filteredConversions = conversions.filter((c) => {
-    const inType = !filters.type || c.conversionType === filters.type;
-    const inStart = !filters.dateRange.start || c.timestamp >= filters.dateRange.start;
-    const inEnd = !filters.dateRange.end || c.timestamp <= filters.dateRange.end;
-    return inType && inStart && inEnd;
-  });
-
-  // Show welcome page if no site is selected
-  if (!currentSiteId) {
-    return <WelcomePage onSiteCreated={setCurrentSiteId} />;
-  }
-
-  return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>ConversionTracker Pro Dashboard</h1>
-        <div className="site-info">Site: {currentSiteId}</div>
-        <button 
-          className="new-site-button"
-          onClick={() => setCurrentSiteId(null)}
-        >
-          + New Site
-        </button>
-      </header>
-      <div className="dashboard-grid">
-        <FilterPanel filters={filters} onFiltersChange={setFilters} />
-        <MetricsCards metrics={null} loading={false} />
-        <div className="chart-section">
-          <ConversionsChart />
-        </div>
-        <div className="detailed-table">
-          <h3>Conversions Table</h3>
-          {loadingConversions ? (
-            <div>Loading conversions...</div>
-          ) : (
-            <ConversionsTable conversions={filteredConversions} />
-          )}
-        </div>
-      </div>
-    </div>
-  );
 }; 

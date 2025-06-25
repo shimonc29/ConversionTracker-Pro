@@ -40,4 +40,4 @@ export interface TouchPoint {
   gclid?: string;
   fbclid?: string;
   msclkid?: string;
-} 
+}
